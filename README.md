@@ -60,33 +60,22 @@ Kun Docker med compose – Python og KiCad skal ikke installeres.
    - Nøgler til de leverandører, du vil bruge (se tabellen ovenfor)
    - `KICAD_MCP_AUTH_TOKEN`: en tilfældig streng på mindst 32 tegn
    - `KICAD_PROJECTS`: mappen med dine KiCad-projekter (standard `./projects`). Med Docker i WSL skal det være en WSL-sti, f.eks. `/mnt/c/Users/<dig>/Documents/KiCad`.
-3. Byg imagerne (KiCad-imaget er ca. 3,7 GB):
-   ```
-   docker compose build
-   ```
-4. Tilføj serverne til Claude Code (én gang):
-   ```
-   claude mcp add --transport http parts http://localhost:8000/mcp
-   claude mcp add --transport http kicad http://localhost:3334/mcp --header "Authorization: Bearer <KICAD_MCP_AUTH_TOKEN>"
-   ```
+3. Kør startscriptet (se nedenfor). Første gang bygges imagerne (KiCad ca. 3,7 GB), der laves et KiCad-token i `.env`, og der skrives en `.mcp.json`, så Claude Code finder serverne.
+4. Genindlæs VS Code / genstart Claude Code, og godkend `parts` og `kicad`.
 
 ## Brug
 
-**Windows med Docker i WSL** – kør i forgrunden og lad vinduet stå åbent. WSL lukker Ubuntu (og dermed containerne) ned, når der ikke er en aktiv `wsl`-session, så `-d` virker ikke her:
+Startscriptet klarer det hele hver gang: tjekker `.env`, laver token og `.mcp.json`, finder Docker (Docker Desktop eller Docker i WSL), bygger og starter.
 
-```
-wsl docker compose up       # start – Ctrl+C stopper
-```
+| | Windows | Linux |
+|---|---|---|
+| Begge servere | dobbeltklik `start.cmd` | `bash start.sh` |
+| Kun komponentsøgning | dobbeltklik `start-parts.cmd` (eller `start.cmd parts`) | `bash start.sh parts` |
+| Kun KiCad | `start.cmd kicad` | `bash start.sh kicad` |
 
-**Linux / Docker Desktop:**
+Serverne kører i forgrunden: lad vinduet stå åbent, og stop med Ctrl+C eller ved at lukke det. På Windows med Docker i WSL er det nødvendigt – WSL lukker Ubuntu (og containerne) ned, når der ikke er en aktiv `wsl`-session.
 
-```
-docker compose up -d        # start
-docker compose logs -f      # se log
-docker compose down         # stop
-```
-
-Efter kodeændringer: tilføj `--build`.
+`.env` og `.mcp.json` er i `.gitignore`. Del `.env` med kollegaer via en password manager, aldrig i git.
 
 I Claude peger du KiCad MCP på et projekt med stien inde i containeren, f.eks. `/projects/mit-board`.
 
