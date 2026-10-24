@@ -1,0 +1,8 @@
+services:
+  parts-mcp:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    # Kun bundet til localhost - Tailscale Funnel/Cloudflare Tunnel sender trafikken ind
+    ports:
+      - "127.0.0.1:8000:8000"
