@@ -1,8 +1,25 @@
 services:
   parts-mcp:
     build: .
+    image: parts-mcp:latest
+    container_name: parts-mcp
     env_file: .env
-    restart: unless-stopped
-    # Kun bundet til localhost - Tailscale Funnel/Cloudflare Tunnel sender trafikken ind
+    # Startes manuelt når den skal bruges - ingen auto-genstart
+    restart: "no"
+    # Kun bundet til localhost - ingen auth, så den må ikke være synlig på netværket
     ports:
       - "127.0.0.1:8000:8000"
+
+  kicad-mcp:
+    build: ./kicad
+    image: kicad-mcp:latest
+    container_name: kicad-mcp
+    restart: "no"
+    environment:
+      # KiCad MCP Pro nægter at starte i en container uden token (min. 32 tegn)
+      KICAD_MCP_AUTH_TOKEN: ${KICAD_MCP_AUTH_TOKEN:?Sæt KICAD_MCP_AUTH_TOKEN i .env}
+    volumes:
+      # KiCad-projekterne ses som /projects inde i containeren
+      - ${KICAD_PROJECTS:-./projects}:/projects
+    ports:
+      - "127.0.0.1:3334:3334"
